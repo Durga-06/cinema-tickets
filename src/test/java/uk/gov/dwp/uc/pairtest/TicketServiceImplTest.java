@@ -2,8 +2,11 @@ package uk.gov.dwp.uc.pairtest;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import thirdparty.paymentgateway.TicketPaymentService;
 import thirdparty.seatbooking.SeatReservationService;
 import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest;
@@ -11,18 +14,20 @@ import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class TicketServiceImplTest {
 
+    @Mock
     private TicketPaymentService ticketPaymentService;
+
+    @Mock
     private SeatReservationService seatReservationService;
+
     private TicketServiceImpl ticketService;
 
     @BeforeEach
     void setUp() {
-        ticketPaymentService = mock(TicketPaymentService.class);
-        seatReservationService = mock(SeatReservationService.class);
         ticketService = new TicketServiceImpl(ticketPaymentService, seatReservationService);
     }
 
