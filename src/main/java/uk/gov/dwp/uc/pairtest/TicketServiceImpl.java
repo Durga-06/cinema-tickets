@@ -11,6 +11,10 @@ public class TicketServiceImpl implements TicketService {
         if (accountId == null) {
             throw new InvalidPurchaseException("Account Id should not be null");
         }
+
+        if (accountId <= 0) {
+            throw new InvalidPurchaseException("Account Id should be greater than 0");
+        }
     }
 
 }
