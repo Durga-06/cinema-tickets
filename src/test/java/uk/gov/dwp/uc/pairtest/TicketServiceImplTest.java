@@ -48,12 +48,24 @@ class TicketServiceImplTest {
     }
 
     @Test
-    void ticketPurchaseWithValidTicketTypeRequestAndValidAccountIdIsAllowed() {
+    void ticketPurchaseWithValidSingleTicketTypeRequestAndValidAccountIdIsAllowed() {
         TicketTypeRequest singleAdult = new TicketTypeRequest(Type.ADULT, 1);
 
         ticketService.purchaseTickets(1L, singleAdult);
 
         verify(ticketPaymentService).makePayment(1L, 25);
         verify(seatReservationService).reserveSeat(1L, 1);
+    }
+
+    @Test
+    void ticketPurchaseWithValidMultipleTicketTypeRequestAndValidAccountIdIsAllowed() {
+        TicketTypeRequest twoAdults = new TicketTypeRequest(Type.ADULT, 2);
+        TicketTypeRequest singleChild = new TicketTypeRequest(Type.CHILD, 1);
+        TicketTypeRequest twoInfants = new TicketTypeRequest(Type.INFANT, 2);
+
+        ticketService.purchaseTickets(1L, twoAdults, singleChild, twoInfants);
+
+        verify(ticketPaymentService).makePayment(1L, 65);
+        verify(seatReservationService).reserveSeat(1L, 3);
     }
 }
