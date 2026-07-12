@@ -14,6 +14,7 @@ import uk.gov.dwp.uc.pairtest.domain.TicketTypeRequest.Type;
 import uk.gov.dwp.uc.pairtest.exception.InvalidPurchaseException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class TicketServiceImplTest {
@@ -44,5 +45,15 @@ class TicketServiceImplTest {
         TicketTypeRequest singleAdult = new TicketTypeRequest(Type.ADULT, 1);
 
         assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(accountId, singleAdult));
+    }
+
+    @Test
+    void ticketPurchaseWithValidTicketTypeRequestAndValidAccountIdIsAllowed() {
+        TicketTypeRequest singleAdult = new TicketTypeRequest(Type.ADULT, 1);
+
+        ticketService.purchaseTickets(1L, singleAdult);
+
+        verify(ticketPaymentService).makePayment(1L, 25);
+        verify(seatReservationService).reserveSeat(1L, 1);
     }
 }
