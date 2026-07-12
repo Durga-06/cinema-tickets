@@ -33,20 +33,9 @@ public class TicketServiceImpl implements TicketService {
         int numberOfSeats = 0;
 
         for (TicketTypeRequest request : ticketTypeRequests) {
-
-            int price = switch (request.type()) {
-                case ADULT -> 25;
-                case CHILD -> 15;
-                case INFANT -> 0;
-            };
-
-            int seats = switch (request.type()) {
-                case ADULT, CHILD -> 1;
-                case INFANT -> 0;
-            };
-
-            totalAmount += price * request.noOfTickets();
-            numberOfSeats += seats * request.noOfTickets();
+            TicketTypeRequest.Type type = request.type();
+            totalAmount += type.cost() * request.noOfTickets();
+            numberOfSeats += type.seatsToBeAllocated() * request.noOfTickets();
         }
 
         ticketPaymentService.makePayment(accountId, totalAmount);
