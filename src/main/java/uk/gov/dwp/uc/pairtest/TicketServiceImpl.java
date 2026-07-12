@@ -29,8 +29,27 @@ public class TicketServiceImpl implements TicketService {
             throw new InvalidPurchaseException("Account Id should be greater than 0");
         }
 
-        ticketPaymentService.makePayment(accountId, ticketTypeRequests[0].noOfTickets() * 25);
-        seatReservationService.reserveSeat(accountId, ticketTypeRequests[0].noOfTickets() * 1);
-    }
+        int totalAmount = 0;
+        int numberOfSeats = 0;
 
+        for (TicketTypeRequest request : ticketTypeRequests) {
+
+            int price = switch (request.type()) {
+                case ADULT -> 25;
+                case CHILD -> 15;
+                case INFANT -> 0;
+            };
+
+            int seats = switch (request.type()) {
+                case ADULT, CHILD -> 1;
+                case INFANT -> 0;
+            };
+
+            totalAmount += price * request.noOfTickets();
+            numberOfSeats += seats * request.noOfTickets();
+        }
+
+        ticketPaymentService.makePayment(accountId, totalAmount);
+        seatReservationService.reserveSeat(accountId, numberOfSeats);
+    }
 }
