@@ -1,15 +1,22 @@
 package uk.gov.dwp.uc.pairtest.domain;
 
+import java.util.Objects;
+
 /**
  * Immutable value object
  */
 
 public record TicketTypeRequest(Type type, int noOfTickets) {
 
+    public TicketTypeRequest {
+        Objects.requireNonNull(type, "type must not be null");
+        if (noOfTickets < 0) {
+            throw new IllegalArgumentException("noOfTickets must not be negative");
+        }
+    }
+
     public enum Type {
-        ADULT(25, 1),
-        CHILD(15, 1),
-        INFANT(0, 0);
+        ADULT(25, 1), CHILD(15, 1), INFANT(0, 0);
 
         private final int cost;
         private final int seatsToBeAllocated;
