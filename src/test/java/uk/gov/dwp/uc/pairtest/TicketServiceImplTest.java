@@ -123,4 +123,16 @@ class TicketServiceImplTest {
         verify(ticketPaymentService).makePayment(1L, 25);
         verify(seatReservationService).reserveSeat(1L, 1);
     }
+
+    @Test
+    void ticketServiceConstructionWithNullPaymentServiceIsRejected() {
+        assertThrows(NullPointerException.class,
+            () -> new TicketServiceImpl(null, seatReservationService));
+    }
+
+    @Test
+    void ticketServiceConstructionWithNullSeatReservationServiceIsRejected() {
+        assertThrows(NullPointerException.class,
+            () -> new TicketServiceImpl(ticketPaymentService, null));
+    }
 }
