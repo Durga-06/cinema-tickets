@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -67,5 +68,59 @@ class TicketServiceImplTest {
 
         verify(ticketPaymentService).makePayment(1L, 65);
         verify(seatReservationService).reserveSeat(1L, 3);
+    }
+
+    @Test
+    void ticketPurchaseWithNoTicketsIsRejected() {
+        assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(1L));
+    }
+
+    @Test
+    void ticketPurchaseWithNullRequestElementIsRejected() {
+        assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(1L, (TicketTypeRequest) null));
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Type.class, names = {"CHILD", "INFANT"})
+    void ticketPurchaseWithoutAdultIsRejected(Type type) {
+        TicketTypeRequest noAdultRequest = new TicketTypeRequest(type, 1);
+
+        assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(1L, noAdultRequest));
+    }
+
+    @Test
+    void ticketPurchaseMoreThanMaxTicketsIsRejected() {
+        TicketTypeRequest twentySixAdults = new TicketTypeRequest(Type.ADULT, 26);
+
+        assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(1L, twentySixAdults));
+    }
+
+    @Test
+    void ticketPurchaseWithLessAdultsThanInfantsIsRejected() {
+        TicketTypeRequest oneAdult = new TicketTypeRequest(Type.ADULT, 1);
+        TicketTypeRequest twoInfants = new TicketTypeRequest(Type.INFANT, 2);
+
+        assertThrows(InvalidPurchaseException.class, () -> ticketService.purchaseTickets(1L, oneAdult, twoInfants));
+    }
+
+    @Test
+    void ticketPurchaseWithExactTicketLimitsIsAllowed() {
+        TicketTypeRequest twentyFiveAdults = new TicketTypeRequest(Type.ADULT, 25);
+
+        ticketService.purchaseTickets(1L, twentyFiveAdults);
+
+        verify(ticketPaymentService).makePayment(1L, 625);
+        verify(seatReservationService).reserveSeat(1L, 25);
+    }
+
+    @Test
+    void ticketPurchaseWithEqualInfantsAndAdultsIsAllowed() {
+        TicketTypeRequest oneAdult = new TicketTypeRequest(Type.ADULT, 1);
+        TicketTypeRequest oneInfant = new TicketTypeRequest(Type.INFANT, 1);
+
+        ticketService.purchaseTickets(1L, oneAdult, oneInfant);
+
+        verify(ticketPaymentService).makePayment(1L, 25);
+        verify(seatReservationService).reserveSeat(1L, 1);
     }
 }
